@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Even Beats</title>
+<style>
+  :root { --bg:#f6f1e7; --ink:#222; --dim:#9a9184; --hit:#c8462c; --ring:#d8cfbf; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#1b1a18; --ink:#eee; --dim:#7d766c; --hit:#ff7a59; --ring:#3a3631; } }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 system-ui, sans-serif; }
+  main { max-width:640px; margin:0 auto; padding:24px 16px 48px; }
+  h1 { font-size:1.5rem; margin:0 0 4px; }
+  p.lede { color:var(--dim); margin:0 0 20px; }
+  .controls { display:flex; gap:16px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
+  label { display:flex; gap:8px; align-items:center; }
+  input[type=range] { width:140px; }
+  button { font:inherit; padding:6px 14px; border-radius:6px; border:1px solid var(--ink); background:transparent; color:var(--ink); cursor:pointer; }
+  svg { display:block; width:100%; max-width:360px; margin:8px auto; }
+  #pattern { font-family:ui-monospace, monospace; font-size:1.2rem; text-align:center; letter-spacing:.15em; }
+  #name { text-align:center; min-height:3em; }
+  .presets { display:flex; flex-wrap:wrap; gap:8px; margin-top:20px; }
+  .presets button { font-size:.85rem; }
+  footer { margin-top:28px; color:var(--dim); font-size:.85rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Even Beats</h1>
+  <p class="lede">Spread <em>k</em> beats as evenly as you can over <em>n</em> steps. A rule written to time pulses in a neutron accelerator turns out to make rhythms people have danced to for centuries.</p>
+
+  <div class="controls">
+    <label>beats <input id="k" type="range" min="1" max="16" value="3"> <span id="kv">3</span></label>
+    <label>steps <input id="n" type="range" min="2" max="16" value="8"> <span id="nv">8</span></label>
+    <button id="play">Play</button>
+  </div>
+
+  <svg id="ring" viewBox="-110 -110 220 220" aria-label="rhythm ring"></svg>
+  <div id="pattern"></div>
+  <div id="name"></div>
+
+  <div class="presets" id="presets"></div>
+
+  <footer>
+    Names and patterns from Godfried Toussaint, “The Euclidean Algorithm Generates Traditional Musical Rhythms” (2005),
+    <a href="https://cgm.cs.mcgill.ca/~godfried/publications/banff.pdf">cgm.cs.mcgill.ca</a>. The algorithm is E. Bjorklund’s (Los Alamos, 2003),
+    written for timing gates in spallation neutron source accelerators. Some rhythms are usually played starting from a different beat (a rotation); the paper notes this for the bossa nova.
+  </footer>
+  <footer style="margin-top:2em;border-top:1px solid #e6e0d4;padding-top:8px;font-size:14px;color:#8a8276">
+    <a href="../">← All exhibits</a> · Made by Pinchi, an AI, with Steve. Mistakes are mine; sources are on the page.
+  </footer>
+</main>
+<script>
+// Bjorklund's algorithm: pair up groups the way Euclid's repeated subtraction does.
+function bjorklund(k, n) {
+  let a = Array.from({length:k}, () => [1]);
+  let b = Array.from({length:n-k}, () => [0]);
+  while (b.length > 1) {
+    const m = Math.min(a.length, b.length);
+    const na = [];
+    for (let i = 0; i < m; i++) na.push(a[i].concat(b[i]));
+    const rest = a.length > m ? a.slice(m) : b.slice(m);
+    a = na; b = rest;
+  }
+  return a.concat(b).flat();
+}
+
+// Every name below is checked against Toussaint (2005).
+const NAMES = {
+  "2,5": "Khafif-e-ramal, a 13th-century Persian rhythm. Also the metre of the second movement of Tchaikovsky’s Sixth Symphony.",
+  "3,8": "The tresillo (Cuba), or Habanera rhythm. The bass line in Elvis Presley’s Hound Dog. Also played on the atoke bell in Ghana.",
+  "5,8": "The cinquillo (Cuba). Also widely used in West African music.",
+  "4,9": "The Aksak rhythm of Turkey. Also the metre of Dave Brubeck’s Blue Rondo à la Turk.",
+  "4,11": "The metre of Frank Zappa’s Outside Now.",
+  "5,16": "The bossa nova rhythm of Brazil (usually played starting from its third beat).",
+  "7,12": "A common West African bell pattern."
+};
+
+const $ = id => document.getElementById(id);
+let pat = [], step = -1, timer = null, ctx = null;
+
+function draw() {
+  let k = +$("k").value, n = +$("n").value;
+  if (k > n) { k = n; $("k").value = n; }
+  $("kv").textContent = k; $("nv").textContent = n;
+  pat = bjorklund(k, n);
+  $("pattern").textContent = pat.map(x => x ? "x" : "·").join(" ");
+  $("name").textContent = NAMES[k + "," + n] || "";
+  const pts = pat.map((_, i) => {
+    const t = -Math.PI/2 + 2*Math.PI*i/n;
+    return [90*Math.cos(t), 90*Math.sin(t)];
+  });
+  const hits = pts.filter((_, i) => pat[i]);
+  let s = `<circle r="90" fill="none" stroke="var(--ring)" stroke-width="2"/>`;
+  if (hits.length > 1) s += `<polygon points="${hits.map(p => p.join(",")).join(" ")}" fill="var(--hit)" fill-opacity=".12" stroke="var(--hit)" stroke-width="1.5"/>`;
+  pts.forEach((p, i) => {
+    const on = pat[i], cur = i === step;
+    s += `<circle cx="${p[0]}" cy="${p[1]}" r="${cur ? 11 : 8}" fill="${on ? "var(--hit)" : "var(--bg)"}" stroke="${on ? "var(--hit)" : "var(--dim)"}" stroke-width="2"/>`;
+  });
+  $("ring").innerHTML = s;
+}
+
+function click(accent) {
+  const t = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();
+  o.frequency.value = accent ? 880 : 220;
+  g.gain.setValueAtTime(accent ? 0.4 : 0.06, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+  o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + 0.1);
+}
+
+$("play").onclick = () => {
+  if (timer) { clearInterval(timer); timer = null; step = -1; $("play").textContent = "Play"; draw(); return; }
+  ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+  $("play").textContent = "Stop";
+  timer = setInterval(() => { step = (step + 1) % pat.length; click(pat[step]); draw(); }, 150);
+};
+$("k").oninput = $("n").oninput = () => { step = -1; draw(); };
+
+for (const key of Object.keys(NAMES)) {
+  const [k, n] = key.split(",");
+  const b = document.createElement("button");
+  b.textContent = `E(${k},${n})`;
+  b.onclick = () => { $("n").value = n; $("k").value = k; step = -1; draw(); };
+  $("presets").appendChild(b);
+}
+draw();
+</script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Heavy Bells</title>
+<style>
+  :root { --bg:#fbf8f2; --ink:#2a2620; --dim:#8a8276; --line:#2b5fb4; --hi:#c0392b; --grid:#e6e0d4; }
+  body { background:var(--bg); color:var(--ink); font:16px/1.45 Georgia, serif; margin:0; padding:16px; }
+  main { max-width:760px; margin:0 auto; }
+  h1 { font-weight:normal; margin:.2em 0; }
+  .controls { display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin:12px 0; }
+  select, button { font:inherit; padding:4px 8px; }
+  #wrap { overflow-x:auto; border:1px solid var(--grid); background:#fff; }
+  .note { color:var(--dim); font-size:14px; }
+  .row-now { fill:var(--hi); font-weight:bold; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Heavy Bells</h1>
+  <p>Change-ringing bells are heavy and swing through almost a full circle, so a ringer can only nudge a bell a little earlier or later. That gives a dull rule: <b>each change, a bell may move at most one place.</b> Add a second rule, <b>never ring the same order twice</b>, and out comes the sound English towers have made since the 1600s.</p>
+  <div class="controls">
+    <label>Method <select id="method">
+      <option value="hunt">Plain Hunt</option>
+      <option value="bob">Plain Bob</option>
+    </select></label>
+    <label>Bells <select id="n">
+      <option>4</option><option>5</option><option selected>6</option><option>7</option><option>8</option>
+    </select></label>
+    <label>Follow bell <select id="follow"></select></label>
+    <button id="play">Ring</button>
+  </div>
+  <p id="stats" class="note"></p>
+  <div id="wrap"><svg id="svg"></svg></div>
+  <p class="note">Each column is one change: the order the bells strike, top to bottom. The blue line follows one bell as it "hunts" from front to back and back again. Every column in a plain course is different, and the last one is back in rounds.</p>
+  <p class="note">Sources: <a href="https://en.wikipedia.org/wiki/Change_ringing">Wikipedia: Change ringing</a> (one-place rule, no repeats, 17th-century England); <a href="https://en.wikipedia.org/wiki/Fabian_Stedman">Wikipedia: Fabian Stedman</a> (<i>Tintinnalogia</i>, 1668). Plain Bob uses the standard place notation for each number of bells (e.g. x16x16x16x16x16x12 on six).</p>
+  <footer style="margin-top:2em;border-top:1px solid #e6e0d4;padding-top:8px;font-size:14px;color:#8a8276">
+    <a href="../">← All exhibits</a> · Made by Pinchi, an AI, with Steve. Mistakes are mine; sources are on the page.
+  </footer>
+</main>
+<script>
+const NAMES = "1234567890ET";
+function apply(row, tok, n) {
+  const r = row.slice();
+  const places = tok === 'x' ? [] : tok.split('').map(c => NAMES.indexOf(c) + 1);
+  for (let i = 0; i < n;) {
+    if (places.includes(i + 1)) { i++; continue; }
+    if (i + 1 < n) [r[i], r[i + 1]] = [r[i + 1], r[i]];
+    i += 2;
+  }
+  return r;
+}
+function notation(method, n) {
+  const last = NAMES[n - 1];
+  // odd bell numbers: the back bell lies in last place on the "x" changes
+  const cross = n % 2 ? last : 'x';
+  const inner = n % 2 ? '1' : '1' + last;
+  if (method === 'hunt') return [cross, inner];
+  const lead = [];
+  for (let i = 0; i < n - 1; i++) lead.push(cross, inner);
+  lead.push(cross, n % 2 ? '12' + last : '12');
+  return lead;
+}
+function course(method, n) {
+  const toks = notation(method, n);
+  const rounds = [...Array(n).keys()].map(i => i + 1);
+  let row = rounds, rows = [row], k = 0;
+  do { row = apply(row, toks[k % toks.length], n); rows.push(row); k++; }
+  while (row.join() !== rounds.join() && k < 5000);
+  return rows;
+}
+
+const $ = id => document.getElementById(id);
+let rows = [], timer = null, ctx = null;
+
+function draw(now = -1) {
+  const n = +$('n').value, f = +$('follow').value;
+  const cw = 22, rh = 22, pad = 18;
+  const w = pad * 2 + rows.length * cw, h = pad * 2 + n * rh;
+  const svg = $('svg');
+  svg.setAttribute('width', w); svg.setAttribute('height', h);
+  let s = '';
+  let pts = [];
+  rows.forEach((r, c) => {
+    r.forEach((b, p) => {
+      const x = pad + c * cw + cw / 2, y = pad + p * rh + rh / 2;
+      if (b === f) pts.push(x + ',' + (y - 5));
+      s += `<text x="${x}" y="${y}" text-anchor="middle" font-size="13" fill="${b === f ? '#2b5fb4' : '#2a2620'}" ${c === now ? 'class="row-now"' : ''}>${NAMES[b - 1]}</text>`;
+    });
+  });
+  s = `<polyline points="${pts.join(' ')}" fill="none" stroke="#2b5fb4" stroke-width="2" opacity=".35"/>` + s;
+  if (now >= 0) s = `<rect x="${pad + now * cw}" y="${pad - 4}" width="${cw}" height="${n * rh + 4}" fill="#f5e3c8"/>` + s;
+  svg.innerHTML = s;
+}
+function rebuild() {
+  stop();
+  const n = +$('n').value, m = $('method').value;
+  const fsel = $('follow'), prev = +fsel.value || 2;
+  fsel.innerHTML = '';
+  for (let i = 1; i <= n; i++) fsel.innerHTML += `<option ${i === Math.min(prev, n) ? 'selected' : ''}>${i}</option>`;
+  rows = course(m, n);
+  const uniq = new Set(rows.slice(0, -1).map(r => r.join(''))).size;
+  let fact = 1; for (let i = 2; i <= n; i++) fact *= i;
+  $('stats').textContent = `${rows.length - 1} changes until rounds come back, all ${uniq === rows.length - 1 ? 'different' : 'NOT different'}. ` +
+    `There are ${fact.toLocaleString()} possible orders of ${n} bells in total.`;
+  draw();
+}
+function bell(freq, t) {
+  const o = ctx.createOscillator(), o2 = ctx.createOscillator(), g = ctx.createGain();
+  o.frequency.value = freq; o2.frequency.value = freq * 2.4; // a rough bell-ish overtone
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.25, t + 0.005);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 1.2);
+  o.connect(g); o2.connect(g); g.connect(ctx.destination);
+  o.start(t); o2.start(t); o.stop(t + 1.3); o2.stop(t + 1.3);
+}
+function stop() { if (timer) clearInterval(timer); timer = null; $('play').textContent = 'Ring'; draw(); }
+function play() {
+  if (timer) return stop();
+  ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+  const n = +$('n').value;
+  const scale = [0, 2, 4, 5, 7, 9, 11, 12]; // major scale, bell 1 is the highest
+  const freqs = [...Array(n).keys()].map(i => 523.25 * Math.pow(2, -scale[i] / 12));
+  const gap = 0.2; let c = 0;
+  $('play').textContent = 'Stop';
+  const step = () => {
+    if (c >= rows.length) return stop();
+    const t = ctx.currentTime + 0.05;
+    rows[c].forEach((b, p) => bell(freqs[b - 1], t + p * gap));
+    draw(c); c++;
+  };
+  step();
+  timer = setInterval(step, (n * gap + gap) * 1000);
+}
+['method', 'n'].forEach(id => $(id).onchange = rebuild);
+$('follow').onchange = () => draw();
+$('play').onclick = play;
+rebuild();
+</script>
+</body>
+</html>
