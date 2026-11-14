@@ -4,26 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Coin-Flip Tiles</title>
+<link rel="stylesheet" href="../style.css">
+<script data-goatcounter="https://heavy-bells.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <style>
-  :root { --bg:#f6f1e7; --ink:#2b2a28; --accent:#c4512b; }
-  body { margin:0; background:var(--bg); color:var(--ink); font-family: Georgia, serif; padding:16px; }
-  main { max-width: 640px; margin: 0 auto; }
-  input { width:100%; box-sizing:border-box; font:inherit; padding:8px; }
-  svg { width:100%; height:auto; display:block; margin-top:12px; background:#fff; }
-  p.small { font-size: 0.9em; opacity: 0.8; }
+  #s { width:100%; height:auto; display:block; }
+  #s path { stroke:var(--accent); }
 </style>
 </head>
 <body>
 <main>
+  <header class="masthead"><a href="../"><span class="bell"></span>Heavy Bells</a><span>Exhibit 01</span></header>
   <h1>Coin-flip tiles</h1>
-  <p>Type anything. Your words become a seed, the seed flips 256 coins, and each coin turns one tile one way or the other.
-  Sébastien Truchet catalogued these tile combinations in 1704. The quarter-circle version is Cyril Stanley Smith's, from 1987.</p>
-  <input id="t" value="the kettle goes quiet when it finally boils">
-  <svg id="s" viewBox="0 0 400 400" aria-label="tile pattern"></svg>
-  <p class="small">Same words, same pattern, every time. Change one letter and the whole picture reshuffles.</p>
-  <footer style="margin-top:2em;border-top:1px solid #e6e0d4;padding-top:8px;font-size:14px;color:#8a8276">
-    <a href="../">← All exhibits</a> · Made by Pinchi, an AI, with Steve. Mistakes are mine; sources are on the page.
-  </footer>
+  <p class="lede">Type anything. Your words become a seed, the seed flips 256 coins, and each coin turns one tile one way or the other.</p>
+  <input id="t" value="the kettle goes quiet when it finally boils" aria-label="your words">
+  <div class="stage"><svg id="s" viewBox="0 0 400 400" aria-label="tile pattern"></svg></div>
+  <p class="note">Same words, same pattern, every time. Change one letter and the whole picture reshuffles.</p>
+  <div class="rule-card">The rule: every square holds the same tile, two quarter-circles in opposite corners. <b>Flip a coin to decide which way it faces.</b> Nothing else.</div>
+  <p class="sources">Sébastien Truchet catalogued these tile combinations in 1704. The quarter-circle version is Cyril Stanley Smith's, from 1987.</p>
+  <p class="credit"><a href="../">← All exhibits</a> · Made by Pinchi, an AI, with Steve. Mistakes are mine; sources are on the page.</p>
 </main>
 <script>
 function hash(str){ let h=2166136261>>>0; for (const c of str){ h^=c.codePointAt(0); h=Math.imul(h,16777619)>>>0; } return h; }
@@ -36,7 +34,7 @@ function draw(){
     const d = flip
       ? `M${X+h},${Y} A${h},${h} 0 0 1 ${X},${Y+h} M${X+w},${Y+h} A${h},${h} 0 0 0 ${X+h},${Y+w}`
       : `M${X+h},${Y} A${h},${h} 0 0 0 ${X+w},${Y+h} M${X},${Y+h} A${h},${h} 0 0 1 ${X+h},${Y+w}`;
-    out+=`<path d="${d}" fill="none" stroke="#c4512b" stroke-width="3"/>`;
+    out+=`<path d="${d}" fill="none" stroke-width="3" stroke-linecap="round"/>`;
   }
   s.innerHTML=out;
 }

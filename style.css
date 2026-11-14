@@ -1,0 +1,72 @@
+/* Heavy Bells: one look for every exhibit. */
+:root {
+  --bg:#f7f2e8; --card:#fffdf8; --ink:#2a2620; --dim:#7f776b; --rule:#e3dccd;
+  --accent:#c4512b; --accent-ink:#fff; --blue:#2b5fb4; --soft:#f1e3cc; --ghost:#cfc6b6;
+  --serif: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:#1a1916; --card:#23211d; --ink:#ece6da; --dim:#9a9184; --rule:#3a3631;
+    --accent:#ff7a59; --accent-ink:#1a1916; --blue:#7aa7f0; --soft:#3a3024; --ghost:#4a453e;
+  }
+}
+:root[data-theme="dark"] {
+  --bg:#1a1916; --card:#23211d; --ink:#ece6da; --dim:#9a9184; --rule:#3a3631;
+  --accent:#ff7a59; --accent-ink:#1a1916; --blue:#7aa7f0; --soft:#3a3024; --ghost:#4a453e;
+}
+
+* { box-sizing:border-box; }
+html { -webkit-text-size-adjust:100%; }
+body { margin:0; background:var(--bg); color:var(--ink); font:17px/1.55 var(--serif); }
+main { max-width:680px; margin:0 auto; padding:20px 16px 56px; }
+a { color:var(--accent); text-underline-offset:2px; }
+
+/* The little museum header on every page */
+.masthead { display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+  font:13px/1.3 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--dim);
+  border-bottom:2px solid var(--ink); padding-bottom:8px; margin-bottom:22px; }
+.masthead a { color:var(--ink); text-decoration:none; }
+.masthead .bell { display:inline-block; width:.9em; height:.9em; margin-right:.4em; vertical-align:-.1em;
+  background:var(--accent); border-radius:50% 50% 12% 12% / 70% 70% 12% 12%; }
+
+h1 { font-weight:normal; font-size:clamp(30px, 7vw, 42px); line-height:1.1; margin:0 0 8px; }
+h2 { font-weight:normal; font-size:21px; margin:2em 0 .5em; padding-top:14px; border-top:1px solid var(--rule); }
+.lede { font-size:19px; color:var(--dim); margin:0 0 20px; }
+.rule-card { background:var(--card); border:1px solid var(--rule); border-left:4px solid var(--accent);
+  padding:12px 14px; margin:18px 0; border-radius:4px; }
+.rule-card b { font-weight:normal; font-style:italic; }
+.label { font:12px var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--dim); }
+.note, .small { color:var(--dim); font-size:15px; }
+.mine { color:var(--dim); font-style:italic; }
+
+/* Controls */
+.controls, .presets { display:flex; flex-wrap:wrap; gap:10px 14px; align-items:center; margin:14px 0; }
+label { display:inline-flex; gap:8px; align-items:center; font-size:15px; }
+button, select, input[type=text], input:not([type]) { font:inherit; font-size:15px; color:var(--ink); }
+button { padding:6px 14px; border-radius:999px; border:1px solid var(--ink); background:transparent; cursor:pointer; }
+button:hover { background:var(--soft); }
+button.primary { background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+button.primary:hover { filter:brightness(1.05); }
+.presets button { font-size:13px; padding:4px 11px; border-color:var(--rule); }
+select { padding:4px 8px; border-radius:6px; border:1px solid var(--rule); background:var(--card); }
+input[type=range] { width:130px; accent-color:var(--accent); }
+input[type=checkbox] { accent-color:var(--accent); }
+input:not([type]), input[type=text] { width:100%; padding:10px 12px; border-radius:6px; border:1px solid var(--rule); background:var(--card); }
+
+.stage { background:var(--card); border:1px solid var(--rule); border-radius:6px; padding:10px; margin:12px 0; }
+
+/* Footer: sources, then who made it */
+.sources { margin-top:2em; font-size:14px; color:var(--dim); }
+.sources a { color:var(--dim); }
+.credit { margin-top:1.5em; padding-top:10px; border-top:1px solid var(--rule); font-size:14px; color:var(--dim); }
+.credit a { color:var(--ink); }
+
+/* Front page list */
+.exhibits { list-style:none; padding:0; margin:0; counter-reset:ex; }
+.exhibits li { counter-increment:ex; display:grid; grid-template-columns:52px 1fr; gap:4px 12px;
+  padding:16px 0; border-top:1px solid var(--rule); }
+.exhibits li::before { content:counter(ex, decimal-leading-zero); font:15px var(--mono); color:var(--accent); padding-top:6px; }
+.exhibits a { font-size:22px; text-decoration:none; color:var(--ink); }
+.exhibits a:hover { color:var(--accent); }
+.exhibits p { grid-column:2; margin:0; color:var(--dim); }

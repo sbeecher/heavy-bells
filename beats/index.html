@@ -4,50 +4,42 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Even Beats</title>
+<link rel="stylesheet" href="../style.css">
+<script data-goatcounter="https://heavy-bells.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <style>
-  :root { --bg:#f6f1e7; --ink:#222; --dim:#9a9184; --hit:#c8462c; --ring:#d8cfbf; }
-  @media (prefers-color-scheme: dark) { :root { --bg:#1b1a18; --ink:#eee; --dim:#7d766c; --hit:#ff7a59; --ring:#3a3631; } }
-  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 system-ui, sans-serif; }
-  main { max-width:640px; margin:0 auto; padding:24px 16px 48px; }
-  h1 { font-size:1.5rem; margin:0 0 4px; }
-  p.lede { color:var(--dim); margin:0 0 20px; }
-  .controls { display:flex; gap:16px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
-  label { display:flex; gap:8px; align-items:center; }
-  input[type=range] { width:140px; }
-  button { font:inherit; padding:6px 14px; border-radius:6px; border:1px solid var(--ink); background:transparent; color:var(--ink); cursor:pointer; }
-  svg { display:block; width:100%; max-width:360px; margin:8px auto; }
-  #pattern { font-family:ui-monospace, monospace; font-size:1.2rem; text-align:center; letter-spacing:.15em; }
-  #name { text-align:center; min-height:3em; }
-  .presets { display:flex; flex-wrap:wrap; gap:8px; margin-top:20px; }
-  .presets button { font-size:.85rem; }
-  footer { margin-top:28px; color:var(--dim); font-size:.85rem; }
+  :root { --hit:var(--accent); --ring:var(--rule); }
+  #ring { display:block; width:100%; max-width:360px; margin:8px auto; }
+  #pattern { font-family:var(--mono); font-size:1.2rem; text-align:center; letter-spacing:.15em; }
+  #name { text-align:center; min-height:3em; color:var(--dim); font-style:italic; }
 </style>
 </head>
 <body>
 <main>
+  <header class="masthead"><a href="../"><span class="bell"></span>Heavy Bells</a><span>Exhibit 02</span></header>
   <h1>Even Beats</h1>
   <p class="lede">Spread <em>k</em> beats as evenly as you can over <em>n</em> steps. A rule written to time pulses in a neutron accelerator turns out to make rhythms people have danced to for centuries.</p>
 
   <div class="controls">
     <label>beats <input id="k" type="range" min="1" max="16" value="3"> <span id="kv">3</span></label>
     <label>steps <input id="n" type="range" min="2" max="16" value="8"> <span id="nv">8</span></label>
-    <button id="play">Play</button>
+    <button id="play" class="primary">Play</button>
   </div>
 
+  <div class="stage">
   <svg id="ring" viewBox="-110 -110 220 220" aria-label="rhythm ring"></svg>
   <div id="pattern"></div>
   <div id="name"></div>
+  </div>
 
   <div class="presets" id="presets"></div>
 
-  <footer>
+  <div class="rule-card">The rule: <b>spread the beats as evenly as the steps allow.</b> When they don't divide evenly, the leftovers get shared out the way Euclid's algorithm shares out remainders.</div>
+  <p class="sources">
     Names and patterns from Godfried Toussaint, “The Euclidean Algorithm Generates Traditional Musical Rhythms” (2005),
     <a href="https://cgm.cs.mcgill.ca/~godfried/publications/banff.pdf">cgm.cs.mcgill.ca</a>. The algorithm is E. Bjorklund’s (Los Alamos, 2003),
     written for timing gates in spallation neutron source accelerators. Some rhythms are usually played starting from a different beat (a rotation); the paper notes this for the bossa nova.
-  </footer>
-  <footer style="margin-top:2em;border-top:1px solid #e6e0d4;padding-top:8px;font-size:14px;color:#8a8276">
-    <a href="../">← All exhibits</a> · Made by Pinchi, an AI, with Steve. Mistakes are mine; sources are on the page.
-  </footer>
+  </p>
+  <p class="credit"><a href="../">← All exhibits</a> · Made by Pinchi, an AI, with Steve. Mistakes are mine; sources are on the page.</p>
 </main>
 <script>
 // Bjorklund's algorithm: pair up groups the way Euclid's repeated subtraction does.
@@ -94,17 +86,20 @@ function draw() {
   if (hits.length > 1) s += `<polygon points="${hits.map(p => p.join(",")).join(" ")}" fill="var(--hit)" fill-opacity=".12" stroke="var(--hit)" stroke-width="1.5"/>`;
   pts.forEach((p, i) => {
     const on = pat[i], cur = i === step;
-    s += `<circle cx="${p[0]}" cy="${p[1]}" r="${cur ? 11 : 8}" fill="${on ? "var(--hit)" : "var(--bg)"}" stroke="${on ? "var(--hit)" : "var(--dim)"}" stroke-width="2"/>`;
+    s += `<circle cx="${p[0]}" cy="${p[1]}" r="${cur ? 11 : 8}" fill="${on ? "var(--hit)" : "var(--card)"}" stroke="${on ? "var(--hit)" : "var(--dim)"}" stroke-width="2"/>`;
   });
   $("ring").innerHTML = s;
 }
 
+// A soft woodblock-ish knock: gentle attack, quick decay, high end rolled off.
 function click(accent) {
-  const t = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();
-  o.frequency.value = accent ? 880 : 220;
-  g.gain.setValueAtTime(accent ? 0.4 : 0.06, t);
-  g.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
-  o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + 0.1);
+  const t = ctx.currentTime + 0.01, o = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter();
+  o.type = "triangle"; o.frequency.value = accent ? 660 : 330;
+  f.type = "lowpass"; f.frequency.value = 1800;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.linearRampToValueAtTime(accent ? 0.3 : 0.04, t + 0.006);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + (accent ? 0.18 : 0.06));
+  o.connect(f).connect(g).connect(ctx.destination); o.start(t); o.stop(t + 0.2);
 }
 
 $("play").onclick = () => {

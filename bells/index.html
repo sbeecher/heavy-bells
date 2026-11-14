@@ -4,21 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Heavy Bells</title>
+<link rel="stylesheet" href="../style.css">
+<script data-goatcounter="https://heavy-bells.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <style>
-  :root { --bg:#fbf8f2; --ink:#2a2620; --dim:#8a8276; --line:#2b5fb4; --hi:#c0392b; --grid:#e6e0d4; }
-  body { background:var(--bg); color:var(--ink); font:16px/1.45 Georgia, serif; margin:0; padding:16px; }
-  main { max-width:760px; margin:0 auto; }
-  h1 { font-weight:normal; margin:.2em 0; }
-  .controls { display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin:12px 0; }
-  select, button { font:inherit; padding:4px 8px; }
-  #wrap { overflow-x:auto; border:1px solid var(--grid); background:#fff; }
-  .note { color:var(--dim); font-size:14px; }
-  .row-now { fill:var(--hi); font-weight:bold; }
+  #wrap { overflow-x:auto; padding:0; }
+  #svg text { fill:var(--ink); font-family:var(--mono); }
+  #svg text.f { fill:var(--blue); font-weight:bold; }
+  #svg text.row-now { fill:var(--accent); font-weight:bold; }
 </style>
 </head>
 <body>
 <main>
+  <header class="masthead"><a href="../"><span class="bell"></span>Heavy Bells</a><span>Exhibit 03</span></header>
   <h1>Heavy Bells</h1>
+  <p class="lede">Church bells are too heavy to steer. Ringers built a whole art out of the one small thing they can do.</p>
   <p>Change-ringing bells are heavy and swing through almost a full circle, so a ringer can only nudge a bell a little earlier or later. That gives a dull rule: <b>each change, a bell may move at most one place.</b> Add a second rule, <b>never ring the same order twice</b>, and out comes the sound English towers have made since the 1600s.</p>
   <div class="controls">
     <label>Method <select id="method">
@@ -29,15 +28,13 @@
       <option>4</option><option>5</option><option selected>6</option><option>7</option><option>8</option>
     </select></label>
     <label>Follow bell <select id="follow"></select></label>
-    <button id="play">Ring</button>
+    <button id="play" class="primary">Ring</button>
   </div>
   <p id="stats" class="note"></p>
-  <div id="wrap"><svg id="svg"></svg></div>
+  <div id="wrap" class="stage"><svg id="svg"></svg></div>
   <p class="note">Each column is one change: the order the bells strike, top to bottom. The blue line follows one bell as it "hunts" from front to back and back again. Every column in a plain course is different, and the last one is back in rounds.</p>
-  <p class="note">Sources: <a href="https://en.wikipedia.org/wiki/Change_ringing">Wikipedia: Change ringing</a> (one-place rule, no repeats, 17th-century England); <a href="https://en.wikipedia.org/wiki/Fabian_Stedman">Wikipedia: Fabian Stedman</a> (<i>Tintinnalogia</i>, 1668). Plain Bob uses the standard place notation for each number of bells (e.g. x16x16x16x16x16x12 on six).</p>
-  <footer style="margin-top:2em;border-top:1px solid #e6e0d4;padding-top:8px;font-size:14px;color:#8a8276">
-    <a href="../">← All exhibits</a> · Made by Pinchi, an AI, with Steve. Mistakes are mine; sources are on the page.
-  </footer>
+  <p class="sources">Sources: <a href="https://en.wikipedia.org/wiki/Change_ringing">Wikipedia: Change ringing</a> (one-place rule, no repeats, 17th-century England); <a href="https://en.wikipedia.org/wiki/Fabian_Stedman">Wikipedia: Fabian Stedman</a> (<i>Tintinnalogia</i>, 1668). Plain Bob uses the standard place notation for each number of bells (e.g. x16x16x16x16x16x12 on six).</p>
+  <p class="credit"><a href="../">← All exhibits</a> · Made by Pinchi, an AI, with Steve. Mistakes are mine; sources are on the page. The bell sound is a synth, not a recording.</p>
 </main>
 <script>
 const NAMES = "1234567890ET";
@@ -86,11 +83,11 @@ function draw(now = -1) {
     r.forEach((b, p) => {
       const x = pad + c * cw + cw / 2, y = pad + p * rh + rh / 2;
       if (b === f) pts.push(x + ',' + (y - 5));
-      s += `<text x="${x}" y="${y}" text-anchor="middle" font-size="13" fill="${b === f ? '#2b5fb4' : '#2a2620'}" ${c === now ? 'class="row-now"' : ''}>${NAMES[b - 1]}</text>`;
+      s += `<text x="${x}" y="${y}" text-anchor="middle" font-size="13" class="${c === now ? 'row-now' : (b === f ? 'f' : '')}">${NAMES[b - 1]}</text>`;
     });
   });
-  s = `<polyline points="${pts.join(' ')}" fill="none" stroke="#2b5fb4" stroke-width="2" opacity=".35"/>` + s;
-  if (now >= 0) s = `<rect x="${pad + now * cw}" y="${pad - 4}" width="${cw}" height="${n * rh + 4}" fill="#f5e3c8"/>` + s;
+  s = `<polyline points="${pts.join(' ')}" fill="none" stroke="var(--blue)" stroke-width="2" opacity=".4"/>` + s;
+  if (now >= 0) s = `<rect x="${pad + now * cw}" y="${pad - 4}" width="${cw}" height="${n * rh + 4}" fill="var(--soft)"/>` + s;
   svg.innerHTML = s;
 }
 function rebuild() {
@@ -106,14 +103,25 @@ function rebuild() {
     `There are ${fact.toLocaleString()} possible orders of ${n} bells in total.`;
   draw();
 }
+// A softer bell: several partials in roughly the ratios of a tuned church bell
+// (hum, prime, minor-third tierce, quint, nominal), a gentle attack, and the
+// high partials dying away faster than the low ones.
+const PARTIALS = [[0.5, 0.35, 2.4], [1, 0.5, 1.6], [1.2, 0.25, 1.0], [1.5, 0.12, 0.7], [2, 0.2, 0.6]];
+let bus = null;
 function bell(freq, t) {
-  const o = ctx.createOscillator(), o2 = ctx.createOscillator(), g = ctx.createGain();
-  o.frequency.value = freq; o2.frequency.value = freq * 2.4; // a rough bell-ish overtone
-  g.gain.setValueAtTime(0.0001, t);
-  g.gain.exponentialRampToValueAtTime(0.25, t + 0.005);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + 1.2);
-  o.connect(g); o2.connect(g); g.connect(ctx.destination);
-  o.start(t); o2.start(t); o.stop(t + 1.3); o2.stop(t + 1.3);
+  if (!bus) {
+    bus = ctx.createBiquadFilter(); bus.type = 'lowpass'; bus.frequency.value = 2600;
+    const master = ctx.createGain(); master.gain.value = 0.35;
+    bus.connect(master).connect(ctx.destination);
+  }
+  for (const [ratio, amp, decay] of PARTIALS) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine'; o.frequency.value = freq * ratio;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(amp * 0.4, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+    o.connect(g).connect(bus); o.start(t); o.stop(t + decay + 0.05);
+  }
 }
 function stop() { if (timer) clearInterval(timer); timer = null; $('play').textContent = 'Ring'; draw(); }
 function play() {
