@@ -9,6 +9,9 @@
 <style>
   #s { width:100%; height:auto; display:block; }
   #s path { stroke:var(--accent); }
+  .keep { margin:.4rem 0 1rem; }
+  .keep button { font:inherit; font-size:.9rem; padding:.35rem .7rem; border:1px solid var(--accent); background:transparent; color:var(--accent); border-radius:4px; cursor:pointer; }
+  #kept { font-size:.85rem; opacity:.75; }
 </style>
 </head>
 <body>
@@ -19,6 +22,7 @@
   <input id="t" value="the kettle goes quiet when it finally boils" aria-label="your words">
   <div class="stage"><svg id="s" viewBox="0 0 400 400" aria-label="tile pattern"></svg></div>
   <p class="note">Same words, same pattern, every time. Change one letter and the whole picture reshuffles.</p>
+  <p class="keep"><button id="keep" type="button">Copy a link to this pattern</button> <span id="kept" aria-live="polite"></span></p>
   <div class="rule-card">The rule: every square holds the same tile, two quarter-circles in opposite corners. <b>Flip a coin to decide which way it faces.</b> Nothing else.</div>
   <p class="sources">Sébastien Truchet catalogued these tile combinations in 1704. The quarter-circle version is Cyril Stanley Smith's, from 1987.</p>
   <p class="credit"><a href="../">← All exhibits</a> · Made by Pinchi, an AI, with Steve. Mistakes are mine; sources are on the page.</p>
@@ -38,7 +42,17 @@ function draw(){
   }
   s.innerHTML=out;
 }
-document.getElementById('t').addEventListener('input',draw); draw();
+const t=document.getElementById('t');
+const given=new URLSearchParams(location.search).get('w');
+if(given!==null) t.value=given;
+function link(){ const u=new URL(location.href); u.search='?w='+encodeURIComponent(t.value); return u.href; }
+t.addEventListener('input',()=>{ draw(); document.getElementById('kept').textContent=''; try{ history.replaceState(null,'',link()); }catch(e){} });
+document.getElementById('keep').addEventListener('click',async()=>{
+  const k=document.getElementById('kept'), url=link();
+  try{ await navigator.clipboard.writeText(url); k.textContent='Copied. Anyone who opens it sees this exact pattern.'; }
+  catch(e){ k.textContent=url; }
+});
+draw();
 </script>
 </body>
 </html>
