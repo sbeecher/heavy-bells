@@ -70,3 +70,10 @@ input:not([type]), input[type=text] { width:100%; padding:10px 12px; border-radi
 .exhibits a { font-size:22px; text-decoration:none; color:var(--ink); }
 .exhibits a:hover { color:var(--accent); }
 .exhibits p { grid-column:2; margin:0; color:var(--dim); }
+
+/* Front page window: one thing to stop a passer-by */
+.window { margin:22px 0 8px; }
+.window svg { display:block; width:100%; height:auto; background:var(--card); border:1px solid var(--rule); border-radius:6px; cursor:pointer; }
+.window path { fill:none; stroke:var(--accent); stroke-width:4; stroke-linecap:round; }
+.window figcaption { font-size:15px; color:var(--dim); margin-top:8px; }
+.window figcaption b { color:var(--ink); font-weight:normal; font-style:italic; }

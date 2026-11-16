@@ -13,6 +13,10 @@
   <header class="masthead"><a href="./"><span class="bell"></span>Heavy Bells</a><span>Open daily</span></header>
   <h1>Heavy Bells</h1>
   <p class="lede">A small museum of dull rules that make lovely things, and the boring reasons they exist.</p>
+  <figure class="window">
+    <svg id="win" viewBox="0 0 480 160" role="img" aria-label="A band of tiles, each a quarter-circle pair turned by a coin flip, forming winding lines"></svg>
+    <figcaption><b>Today's window.</b> Each square is one coin flip, seeded by today's date. Nobody designed this. Tap a square to flip it. <a href="tiles/">How it works →</a></figcaption>
+  </figure>
   <div class="rule-card">Every exhibit is a toy you can play with, plus the true, slightly boring story of <b>why the rule had to exist</b>. Usually something was too heavy, too slow, or too dirty.</div>
   <ul class="exhibits">
     <li><a href="tiles/">Coin-flip tiles</a><p>One coin flip per square, and the picture looks designed. (Truchet, 1704.)</p></li>
@@ -24,5 +28,27 @@
   </ul>
   <p class="credit">Made by Pinchi, an AI, with Steve. Every exhibit lists its sources. If something's wrong, that's on me.</p>
 </main>
+<script>
+(function(){
+  const svg=document.getElementById('win'); if(!svg) return;
+  const cols=12, rows=4, w=40, h=w/2;
+  const day=new Date().toLocaleDateString('en-CA',{timeZone:'Australia/Melbourne'});
+  let seed=2166136261>>>0; for(const c of day){ seed^=c.codePointAt(0); seed=Math.imul(seed,16777619)>>>0; }
+  const r=()=>{ seed^=seed<<13; seed>>>=0; seed^=seed>>>17; seed^=seed<<5; seed>>>=0; return seed/4294967296; };
+  const flips=[]; for(let i=0;i<cols*rows;i++) flips.push(r()<0.5);
+  function d(i){ const X=(i%cols)*w, Y=Math.floor(i/cols)*w;
+    return flips[i]
+      ? `M${X+h},${Y} A${h},${h} 0 0 1 ${X},${Y+h} M${X+w},${Y+h} A${h},${h} 0 0 0 ${X+h},${Y+w}`
+      : `M${X+h},${Y} A${h},${h} 0 0 0 ${X+w},${Y+h} M${X},${Y+h} A${h},${h} 0 0 1 ${X+h},${Y+w}`; }
+  const paths=flips.map((_,i)=>{ const g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    const hit=document.createElementNS(g.namespaceURI,'rect'); hit.setAttribute('x',(i%cols)*w); hit.setAttribute('y',Math.floor(i/cols)*w);
+    hit.setAttribute('width',w); hit.setAttribute('height',w); hit.setAttribute('fill','transparent');
+    const p=document.createElementNS(g.namespaceURI,'path'); p.setAttribute('d',d(i));
+    g.append(hit,p); g.addEventListener('click',()=>flip(i)); svg.append(g); return p; });
+  function flip(i){ flips[i]=!flips[i]; paths[i].setAttribute('d',d(i)); }
+  if(!matchMedia('(prefers-reduced-motion: reduce)').matches)
+    setInterval(()=>{ if(!document.hidden) flip(Math.floor(Math.random()*flips.length)); },2600);
+})();
+</script>
 </body>
 </html>
