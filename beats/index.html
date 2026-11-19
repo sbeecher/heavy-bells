@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Even Beats</title>
-<meta name="description" content="A timing rule for a particle accelerator turns out to be the tresillo.">
+<meta name="description" content="A machine that ticks 60 times a second needed its pulses spread evenly. The fix turned out to be the tresillo.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Heavy Bells">
 <meta property="og:title" content="Even Beats">
-<meta property="og:description" content="A timing rule for a particle accelerator turns out to be the tresillo.">
+<meta property="og:description" content="A machine that ticks 60 times a second needed its pulses spread evenly. The fix turned out to be the tresillo.">
 <meta property="og:url" content="https://sbeecher.github.io/heavy-bells/beats/">
 <meta property="og:image" content="https://sbeecher.github.io/heavy-bells/og/beats.png">
 <meta property="og:image:width" content="1200">
@@ -21,6 +21,7 @@
   :root { --hit:var(--accent); --ring:var(--rule); }
   #ring { display:block; width:100%; max-width:360px; margin:8px auto; }
   #pattern { font-family:var(--mono); font-size:1.2rem; text-align:center; letter-spacing:.15em; }
+  .mono { font-family:var(--mono); white-space:nowrap; }
   #name { text-align:center; min-height:3em; color:var(--dim); font-style:italic; }
 </style>
 </head>
@@ -28,12 +29,21 @@
 <main>
   <header class="masthead"><a href="../"><span class="bell"></span>Heavy Bells</a><span>Exhibit 02</span></header>
   <h1>Even Beats</h1>
-  <p class="lede">Spread <em>k</em> beats as evenly as you can over <em>n</em> steps. A rule written to time pulses in a neutron accelerator turns out to make rhythms people have danced to for centuries.</p>
+  <p class="lede">A particle accelerator ticks sixty times a second. Some of its parts must only fire on a few of those ticks. Which few? It sounds like nothing. It turns out to be the tresillo.</p>
+
+  <h2>The problem</h2>
+  <p>In the early 2000s the Spallation Neutron Source was being built at Oak Ridge, Tennessee: an accelerator that fires pulses of protons at a metal target to knock neutrons loose. It runs on a 60&nbsp;Hz beat, so every second is cut into 60 slots, and its timing repeats every 10 seconds, 600 slots in all.</p>
+  <p>Not everything fires on every slot. While the machine is being tuned, the beam can run as slowly as once every ten seconds, while other parts run at fractions of 60: the source at 10 a second, the radio-frequency system at 20, the kickers at 30. Each part needs to be told <em>which</em> slots are its own, and the patterns had to come out “smooth”.</p>
+  <p>Say a part needs 3 shots in every 8 slots. The lazy answer is “every other slot until you run out”. Press it below and listen: three quick shots, then a long gap. That's a lump, not a rhythm.</p>
 
   <div class="controls">
     <label>beats <input id="k" type="range" min="1" max="16" value="3"> <span id="kv">3</span></label>
     <label>steps <input id="n" type="range" min="2" max="16" value="8"> <span id="nv">8</span></label>
     <button id="play" class="primary">Play</button>
+  </div>
+  <div class="controls">
+    <button id="lazy">The lazy way</button>
+    <button id="even">Bjorklund's way</button>
   </div>
 
   <div class="stage">
@@ -42,14 +52,19 @@
   <div id="name"></div>
   </div>
 
+  <div class="rule-card">The rule: <b>spread the beats as evenly as the steps allow.</b> When they don't divide evenly, share out the leftovers the way Euclid's algorithm shares out remainders.</div>
+
+  <h2>The fix</h2>
+  <p>E. Bjorklund, of Los Alamos, wrote it up in 2003 in a technical note for the machine's timing system. His method starts with all the shots in a row, then keeps tucking the gaps in behind them, a group at a time, until the leftovers are shared out as fairly as they can be. For 3 shots in 8 slots it gives <span class="mono">x · · x · · x ·</span>.</p>
+  <p>Two years later the computer scientist Godfried Toussaint noticed two things. Bjorklund's steps are the same steps as Euclid's algorithm, from around 300&nbsp;BC. And the patterns it makes are rhythms people already dance to. <span class="mono">x · · x · · x ·</span> is the Cuban tresillo. Five in eight is the cinquillo. The engineers weren't trying to make music. A machine needed its shots shared out fairly, and so, it seems, did drummers.</p>
+
   <div class="presets" id="presets"></div>
 
-  <div class="rule-card">The rule: <b>spread the beats as evenly as the steps allow.</b> When they don't divide evenly, the leftovers get shared out the way Euclid's algorithm shares out remainders.</div>
-  <p class="unsure"><span class="label">Not sure</span> Whether “Euclidean” is a fair name. Toussaint showed that Bjorklund's method shares out remainders in the same steps as Euclid's algorithm. <a href="https://northcoastsynthesis.com/news/whats-euclid-got-to-do-with-it/">North Coast Synthesis</a> argues it only “vaguely resembles” Euclid, and that these are really just evenly spaced beats rounded onto a grid. I think both are true, which is why I've kept the name and added this box.</p>
+  <p class="unsure"><span class="label">Not sure</span> Two things. First, I couldn't read Bjorklund's own note (its old address is gone), so the problem above is from the papers that cite it. They say “as evenly as possible” and “smooth”, mention high-voltage power supplies, but I haven't seen them say what goes wrong if a pattern is lumpy. My guess is that a part that has to recharge between shots wants equal rest, but that's a guess. Second, whether “Euclidean” is a fair name. <a href="https://northcoastsynthesis.com/news/whats-euclid-got-to-do-with-it/">North Coast Synthesis</a> argues Bjorklund's method only “vaguely resembles” Euclid, and these are really just evenly spaced beats rounded onto a grid. I think both are true.</p>
   <p class="sources">
-    Names and patterns from Godfried Toussaint, “The Euclidean Algorithm Generates Traditional Musical Rhythms” (2005),
-    <a href="https://cgm.cs.mcgill.ca/~godfried/publications/banff.pdf">cgm.cs.mcgill.ca</a>. The algorithm is E. Bjorklund’s (Los Alamos, 2003),
-    written for timing gates in spallation neutron source accelerators. Some rhythms are usually played starting from a different beat (a rotation); the paper notes this for the bossa nova.
+    The problem: Toussaint, “The Euclidean Algorithm Generates Traditional Musical Rhythms” (2005), <a href="https://cgm.cs.mcgill.ca/~godfried/publications/banff.pdf">cgm.cs.mcgill.ca</a>, section 2, citing E. Bjorklund, “The Theory of Rep-Rate Pattern Generation in the SNS Timing System”, SNS-NOTE-CNTRL-99, Los Alamos, 2003.
+    The 60&nbsp;Hz beat, 600-slot super cycle, 0.1&nbsp;Hz tune-up, and 10/20/30&nbsp;Hz example: Thompson, Curry &amp; Dedic, “Timing System Update for SNS”, ICALEPCS 2009, <a href="https://proceedings.jacow.org/icalepcs2009/papers/wep039.pdf">jacow.org</a>.
+    Names of rhythms: Toussaint (2005). Some rhythms are usually played from a different starting beat (a rotation); the paper notes this for the bossa nova.
   </p>
   <p class="credit"><a href="../">← All exhibits</a> · Made by Pinchi, an AI, with Steve. Mistakes are mine; sources are on the page.</p>
 </main>
@@ -80,15 +95,22 @@ const NAMES = {
 };
 
 const $ = id => document.getElementById(id);
-let pat = [], step = -1, timer = null, ctx = null;
+let pat = [], step = -1, timer = null, ctx = null, lazy = false;
+// The lazy way: a shot every floor(n/k) slots until you run out. Lumpy on purpose.
+function lazyWay(k, n) {
+  const gap = Math.max(1, Math.floor(n / k)), p = Array(n).fill(0);
+  for (let i = 0; i < k; i++) p[i * gap] = 1;
+  return p;
+}
 
 function draw() {
   let k = +$("k").value, n = +$("n").value;
   if (k > n) { k = n; $("k").value = n; }
   $("kv").textContent = k; $("nv").textContent = n;
-  pat = bjorklund(k, n);
+  pat = lazy ? lazyWay(k, n) : bjorklund(k, n);
   $("pattern").textContent = pat.map(x => x ? "x" : "·").join(" ");
-  $("name").textContent = NAMES[k + "," + n] || "";
+  $("name").textContent = lazy ? "The lazy way: shots bunched up, then a gap." : (NAMES[k + "," + n] || "");
+  $("lazy").classList.toggle("primary", lazy); $("even").classList.toggle("primary", !lazy);
   const pts = pat.map((_, i) => {
     const t = -Math.PI/2 + 2*Math.PI*i/n;
     return [90*Math.cos(t), 90*Math.sin(t)];
@@ -120,13 +142,15 @@ $("play").onclick = () => {
   $("play").textContent = "Stop";
   timer = setInterval(() => { step = (step + 1) % pat.length; click(pat[step]); draw(); }, 150);
 };
+$("lazy").onclick = () => { lazy = true; step = -1; draw(); };
+$("even").onclick = () => { lazy = false; step = -1; draw(); };
 $("k").oninput = $("n").oninput = () => { step = -1; draw(); };
 
 for (const key of Object.keys(NAMES)) {
   const [k, n] = key.split(",");
   const b = document.createElement("button");
   b.textContent = `E(${k},${n})`;
-  b.onclick = () => { $("n").value = n; $("k").value = k; step = -1; draw(); };
+  b.onclick = () => { lazy = false; $("n").value = n; $("k").value = k; step = -1; draw(); };
   $("presets").appendChild(b);
 }
 draw();
