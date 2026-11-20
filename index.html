@@ -45,7 +45,7 @@
   const day=new Date().toLocaleDateString('en-CA',{timeZone:'Australia/Melbourne'});
   let seed=2166136261>>>0; for(const c of day){ seed^=c.codePointAt(0); seed=Math.imul(seed,16777619)>>>0; }
   const r=()=>{ seed^=seed<<13; seed>>>=0; seed^=seed>>>17; seed^=seed<<5; seed>>>=0; return seed/4294967296; };
-  const wl=document.getElementById('winlink'); if(wl) wl.href='tiles/?w='+day;
+  const wl=document.getElementById('winlink'); if(wl) wl.href='tiles/?w='+day+'&k=0';
   const flips=[]; for(let i=0;i<cols*rows;i++) flips.push(r()<0.5);
   function d(i){ const X=(i%cols)*w, Y=Math.floor(i/cols)*w;
     return flips[i]
