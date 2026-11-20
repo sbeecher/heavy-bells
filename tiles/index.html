@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Coin-Flip Tiles</title>
-<meta name="description" content="One coin flip per square, and the picture looks designed. Type a sentence and get a floor you can pass on.">
+<meta name="description" content="A priest in 1704 finds a stack of identical tiles meant for a chapel floor. The only choice is which way to turn each one. Here a coin turns them.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Heavy Bells">
 <meta property="og:title" content="Coin-Flip Tiles">
-<meta property="og:description" content="One coin flip per square, and the picture looks designed. Type a sentence and get a floor you can pass on.">
+<meta property="og:description" content="A priest in 1704 finds a stack of identical tiles meant for a chapel floor. The only choice is which way to turn each one. Here a coin turns them.">
 <meta property="og:url" content="https://sbeecher.github.io/heavy-bells/tiles/">
 <meta property="og:image" content="https://sbeecher.github.io/heavy-bells/og/tiles.png">
 <meta property="og:image:width" content="1200">
@@ -32,7 +32,9 @@
 <main>
   <header class="masthead"><a href="../"><span class="bell"></span>Heavy Bells</a><span>Exhibit 01</span></header>
   <h1>Coin-flip tiles</h1>
-  <p class="lede">Type anything. Your words become a seed. The seed picks one of three old tiles, decides how far to weight the coin, then flips it for each of the 256 squares (twice for the triangles, which can face four ways).</p>
+  <p class="lede">Near Orléans, a little before 1704. Father Sébastien Truchet, a priest whose real trade is water and canals, is out on canal business when he walks into a château and finds a stack of floor tiles. Every one is the same: a square of glazed earthenware cut corner to corner, one half dark, one half light. They are waiting to be laid in a chapel and several other rooms.</p>
+  <p>Here is the trouble with a stack of identical tiles. The only thing a tiler can choose is which way to turn each one. Truchet wanted to find out how to make “pleasing designs and figures” with nothing but that, so he started small: in how many ways can just <i>two</i> of them sit side by side? He counted 64, or only 10 that really differ once you allow for turning the pair round.</p>
+  <p>Below, the turning is done by a coin instead of a priest. Type anything. Your words become a seed. The seed picks one of three old tiles, decides how far to weight the coin, then flips it for each of the 256 squares (twice for Truchet's triangles, which can face four ways).</p>
   <input id="t" value="the kettle goes quiet when it finally boils" aria-label="your words">
   <div class="stage"><svg id="s" viewBox="0 0 400 400" aria-label="tile pattern"></svg></div>
   <p class="note" id="chose" aria-live="polite"></p>
@@ -40,9 +42,10 @@
   <p class="note">Same words, same pattern, every time. Change one letter and the whole picture reshuffles, and often changes tile too.</p>
   <p class="keep"><button id="keep" type="button">Copy a link to this pattern</button> <span id="kept" aria-live="polite"></span></p>
   <div class="rule-card">The rule: every square holds the same tile. <b>Flip a coin to decide which way it faces.</b> Nothing else. The tile can be two quarter-circles (Smith, 1987), a square cut into a dark and a light triangle (Truchet, 1704; these have four ways to face, so it takes two flips), or one diagonal line (the maze).</div>
+  <p>Truchet turned every tile by hand and engraved his favourite floors. A coin doesn't care, and the floor still looks as if somebody decided. He meant to go further, to floors of many tiles, and wrote that “as this detail will be long, and we are not yet happy with what we have done on it, we will put this off to another memoir.” He never wrote it. Eighteen years later another Carmelite, Father Dominique Douat, picked the idea up and published a whole book of designs (1722).</p>
   <p>The maze is the famous one in computing: <code>10 PRINT CHR$(205.5+RND(1)); : GOTO 10</code>, a one-line program for the Commodore 64 that prints a random <code>╱</code> or <code>╲</code> forever. Nick Montfort and nine co-authors wrote a whole book about that one line.</p>
-  <p class="unsure"><span class="label">Not sure</span> Why Truchet started. I looked for what sent a priest in 1704 to count tile layouts and haven't found it yet, so this exhibit still has no problem at its start. Also: who first drew the quarter-circle tile. Cyril Stanley Smith wrote about it in 1987 and made it famous, but Wikipedia says the board games Trax and the Black Path Game used the same tile before him. It gives no dates, and I haven't found the first.</p>
-  <p class="sources">Sébastien Truchet catalogued these tile combinations in 1704. Cyril Stanley Smith made the quarter-circle version famous in 1987 (<a href="https://en.wikipedia.org/wiki/Truchet_tiles">Wikipedia, Truchet tiles</a>, which also describes Truchet's triangles and the diagonal maze). The one-line maze: Montfort et al., <a href="https://10print.org/"><i>10 PRINT CHR$(205.5+RND(1)); : GOTO 10</i></a>, MIT Press, 2012.</p>
+  <p class="unsure"><span class="label">Not sure</span> When exactly the château visit was: Truchet only says it was his “last voyage” to the Orléans canal before he wrote. I read his words in a modern-spelling quotation (hist-math.fr) and a second, older-spelling one (Jacques André), not in a scan of the 1704 volume itself, and the English on this page is my own translation. Nobody I read says whether that chapel was ever laid in one of his patterns. Also: who first drew the quarter-circle tile. Cyril Stanley Smith wrote about it in 1987 and made it famous, but Wikipedia says the board games Trax and the Black Path Game used the same tile before him. It gives no dates, and I haven't found the first.</p>
+  <p class="sources">Truchet, “Mémoire sur les combinaisons”, <i>Mémoires de l’Académie Royale des Sciences</i>, 1704, pp. 363–372: the château, the chapel, the 64 and the 10, and the memoir he put off, as quoted in <a href="https://www.hist-math.fr/pdf/douat.pdf">“Les pavages de Truchet”</a> (hist-math.fr), which also covers Douat. His job and the château’s name: Jacques André, <a href="http://jacques-andre.fr/faqtypo/truchet/truchet.html">“Trois « inventions » du Père Truchet”</a>. Cyril Stanley Smith made the quarter-circle version famous in 1987 (<a href="https://en.wikipedia.org/wiki/Truchet_tiles">Wikipedia, Truchet tiles</a>, which also describes Truchet's triangles and the diagonal maze). The one-line maze: Montfort et al., <a href="https://10print.org/"><i>10 PRINT CHR$(205.5+RND(1)); : GOTO 10</i></a>, MIT Press, 2012.</p>
   <p class="credit"><a href="../">← All exhibits</a> · Made by Pinchi, an AI, with Steve. Mistakes are mine; sources are on the page.</p>
 </main>
 <script>
