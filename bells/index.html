@@ -34,6 +34,7 @@
     <label>Method <select id="method">
       <option value="hunt">Plain Hunt</option>
       <option value="bob">Plain Bob</option>
+      <option value="plain">Plain changes (one swap)</option>
     </select></label>
     <label>Bells <select id="n">
       <option>4</option><option>5</option><option selected>6</option><option>7</option><option>8</option>
@@ -44,7 +45,7 @@
   <p id="stats" class="note"></p>
   <div id="wrap" class="stage"><svg id="svg"></svg></div>
   <p class="note">Each column is one change: the order the bells strike, top to bottom. The blue line follows one bell as it "hunts" from front to back and back again. Every column in a plain course is different, and the last one is back in rounds.</p>
-  <p class="cousin"><span class="label">Cousin</span> <a href="../gray/">Only One Switch</a>. Plain Hunt and Plain Bob swap several pairs at once, but an older method, <i>plain changes</i>, swaps just one neighbouring pair per change. Ringers knew it for four bells by about 1621. In the early 1960s, mathematicians Selmer Johnson and Hale Trotter each rediscovered it as a way to list every order of a set, one small swap at a time: a Gray code for orders instead of switches. (<a href="https://en.wikipedia.org/wiki/Steinhaus%E2%80%93Johnson%E2%80%93Trotter_algorithm">Wikipedia: Steinhaus–Johnson–Trotter algorithm</a>)</p>
+  <p class="cousin"><span class="label">Cousin</span> <a href="../gray/">Only One Switch</a>. Plain Hunt and Plain Bob swap several pairs at once, but an older method, <i>plain changes</i>, swaps just one neighbouring pair per change. Ringers knew it for four bells by about 1621. In the early 1960s, mathematicians Selmer Johnson and Hale Trotter each rediscovered it as a way to list every order of a set, one small swap at a time: a Gray code for orders instead of switches. Pick <b>Plain changes</b> in the Method box above to hear it: the treble walks through the others one swap at a time, and at each end the other bells make a single swap of their own. (<a href="https://en.wikipedia.org/wiki/Steinhaus%E2%80%93Johnson%E2%80%93Trotter_algorithm">Wikipedia: Steinhaus–Johnson–Trotter algorithm</a>)</p>
   <p class="unsure"><span class="label">Not sure</span> Who wrote the first book on change ringing. <i>Tintinnalogia</i> is usually tied to Fabian Stedman, but Wikipedia says Richard Duckworth wrote it and Stedman published it. A <a href="https://www.grubstreetproject.net/publications/R12600">library catalogue record</a> notes it has also been put down to Stedman and to a Thomas White. Even the year wobbles: Wikipedia gives both 1667 and 1668.</p>
   <p class="sources">Sources: <a href="https://en.wikipedia.org/wiki/Change_ringing">Wikipedia: Change ringing</a> (one-place rule, no repeats, 17th-century England); <a href="https://en.wikipedia.org/wiki/Fabian_Stedman">Wikipedia: Fabian Stedman</a> (<i>Tintinnalogia</i>, 1668). Plain Bob uses the standard place notation for each number of bells (e.g. x16x16x16x16x16x12 on six).</p>
   <p class="credit"><a href="../">← All exhibits</a> · Made by Pinchi, an AI, with Steve. Mistakes are mine; sources are on the page. The bell sound is a synth, not a recording.</p>
@@ -72,7 +73,29 @@ function notation(method, n) {
   lead.push(cross, n % 2 ? '12' + last : '12');
   return lead;
 }
+// Plain changes: Steinhaus–Johnson–Trotter. Each step swaps one neighbouring
+// pair. Standard SJT moves the largest number; reversing the row and the
+// labels makes bell 1 (the treble) the one that hunts, starting from rounds.
+function plainChanges(n) {
+  let p = [...Array(n).keys()].map(i => i + 1), dir = p.map(() => -1);
+  const out = [p.slice()];
+  while (true) {
+    let m = -1;
+    for (let i = 0; i < n; i++) {
+      const j = i + dir[i];
+      if (j >= 0 && j < n && p[j] < p[i] && (m < 0 || p[i] > p[m])) m = i;
+    }
+    if (m < 0) break;
+    const j = m + dir[m], v = p[m];
+    [p[m], p[j]] = [p[j], p[m]]; [dir[m], dir[j]] = [dir[j], dir[m]];
+    for (let i = 0; i < n; i++) if (p[i] > v) dir[i] = -dir[i];
+    out.push(p.slice());
+  }
+  out.push(out[0].slice()); // the last order is one swap from rounds
+  return out.map(r => r.slice().reverse().map(b => n + 1 - b));
+}
 function course(method, n) {
+  if (method === 'plain') return plainChanges(n);
   const toks = notation(method, n);
   const rounds = [...Array(n).keys()].map(i => i + 1);
   let row = rounds, rows = [row], k = 0;
@@ -82,7 +105,7 @@ function course(method, n) {
 }
 
 const $ = id => document.getElementById(id);
-let rows = [], timer = null, ctx = null;
+let rows = [], timer = null, ctx = null, lastMethod = null;
 
 function draw(now = -1) {
   const n = +$('n').value, f = +$('follow').value;
@@ -105,15 +128,21 @@ function draw(now = -1) {
 }
 function rebuild() {
   stop();
-  const n = +$('n').value, m = $('method').value;
-  const fsel = $('follow'), prev = +fsel.value || 2;
+  const m = $('method').value;
+  [...$('n').options].forEach(o => o.disabled = m === 'plain' && +o.value > 6);
+  if (m === 'plain' && +$('n').value > 6) $('n').value = '6';
+  const n = +$('n').value;
+  const fsel = $('follow');
+  if (m !== lastMethod) fsel.value = m === 'plain' ? '1' : '2';
+  lastMethod = m;
+  const prev = +fsel.value || 2;
   fsel.innerHTML = '';
   for (let i = 1; i <= n; i++) fsel.innerHTML += `<option ${i === Math.min(prev, n) ? 'selected' : ''}>${i}</option>`;
   rows = course(m, n);
   const uniq = new Set(rows.slice(0, -1).map(r => r.join(''))).size;
   let fact = 1; for (let i = 2; i <= n; i++) fact *= i;
   $('stats').textContent = `${rows.length - 1} changes until rounds come back, all ${uniq === rows.length - 1 ? 'different' : 'NOT different'}. ` +
-    `There are ${fact.toLocaleString()} possible orders of ${n} bells in total.`;
+    `There are ${fact.toLocaleString()} possible orders of ${n} bells in total` + (uniq === fact ? ', and this method rings every one.' : '.');
   draw();
 }
 // A softer bell: several partials in roughly the ratios of a tuned church bell
