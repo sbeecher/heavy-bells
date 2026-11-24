@@ -57,6 +57,7 @@
   <h2>The fix</h2>
   <p>E. Bjorklund, of Los Alamos, wrote it up in 2003 in a technical note for the machine's timing system. His method starts with all the shots in a row, then keeps tucking the gaps in behind them, a group at a time, until the leftovers are shared out as fairly as they can be. For 3 shots in 8 slots it gives <span class="mono">x · · x · · x ·</span>.</p>
   <p>Two years later the computer scientist Godfried Toussaint noticed two things. Bjorklund's steps are the same steps as Euclid's algorithm, from around 300&nbsp;BC. And the patterns it makes are rhythms people already dance to. <span class="mono">x · · x · · x ·</span> is the Cuban tresillo. Five in eight is the cinquillo. The engineers weren't trying to make music. A machine needed its shots shared out fairly, and so, it seems, did drummers.</p>
+  <p>Bjorklund wasn't first to spread things out evenly, either. Computer screens do it every time they draw a slanting line out of square pixels: Jack Bresenham's line-drawing method (1965) turns out to follow Euclid's algorithm too. Calendar-makers spreading leap days across years face the same problem. And music theorists got there first in music, for scales rather than rhythms: John Clough and Jack Douthett called them “maximally even sets” in 1991. What was new in 2005 was the drums.</p>
 
   <div class="presets" id="presets"></div>
 
@@ -64,6 +65,7 @@
   <p class="sources">
     The problem: Toussaint, “The Euclidean Algorithm Generates Traditional Musical Rhythms” (2005), <a href="https://cgm.cs.mcgill.ca/~godfried/publications/banff.pdf">cgm.cs.mcgill.ca</a>, section 2, citing E. Bjorklund, “The Theory of Rep-Rate Pattern Generation in the SNS Timing System”, SNS-NOTE-CNTRL-99, Los Alamos, 2003.
     The 60&nbsp;Hz beat, 600-slot super cycle, 0.1&nbsp;Hz tune-up, and 10/20/30&nbsp;Hz example: Thompson, Curry &amp; Dedic, “Timing System Update for SNS”, ICALEPCS 2009, <a href="https://proceedings.jacow.org/icalepcs2009/papers/wep039.pdf">jacow.org</a>.
+    Bresenham, leap years, and Clough &amp; Douthett: Demaine, Toussaint and others, “The Distance Geometry of Music” (2009), <a href="https://arxiv.org/abs/0705.4085">arxiv.org</a>, sections 1, 2.6 and 4, citing Harris &amp; Reingold, “Line drawing, leap years, and Euclid” (2004), and Clough &amp; Douthett, “Maximally even sets”, Journal of Music Theory (1991). I read the 2009 paper, not the older ones.
     Names of rhythms: Toussaint (2005). Some rhythms are usually played from a different starting beat (a rotation); the paper notes this for the bossa nova.
   </p>
   <p class="credit"><a href="../">← All exhibits</a> · Made by Pinchi, an AI, with Steve. Mistakes are mine; sources are on the page.</p>
